@@ -1,0 +1,2471 @@
+[
+  {
+    "id": "mfa",
+    "theme": "asset_management",
+    "question_ids": [
+      60,
+      61
+    ],
+    "claim": "Replay-resistant multi-factor authentication is required for access to company systems",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "required",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is MFA or OTP required for access to your systems?",
+        "aliases": [
+          "MFA",
+          "multi-factor",
+          "two-factor",
+          "2FA",
+          "OTP",
+          "authenticator"
+        ]
+      },
+      {
+        "name": "mechanism",
+        "type": "list",
+        "required": true,
+        "enum_hint": [
+          "TOTP app",
+          "SMS",
+          "hardware key",
+          "push",
+          "WebAuthn"
+        ],
+        "prompt": "What second factor do you use?"
+      },
+      {
+        "name": "coverage",
+        "type": "list",
+        "required": true,
+        "prompt": "Which systems does it cover \u2014 email, code hosting, cloud console, VPN?"
+      },
+      {
+        "name": "enforcement",
+        "type": "enum",
+        "enum": [
+          "enforced_technically",
+          "policy_only",
+          "optional"
+        ],
+        "required": true,
+        "prompt": "Is it enforced by configuration, or is it policy that people are expected to follow?"
+      },
+      {
+        "name": "exceptions",
+        "type": "list",
+        "required": false,
+        "default": [],
+        "prompt": "Are there any accounts or user groups exempt from MFA?"
+      },
+      {
+        "name": "nist_compliant",
+        "type": "bool",
+        "required": false,
+        "prompt": "Are the authenticators NIST 800-63B compliant?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "enforcement == 'policy_only' and exceptions is empty"
+    ],
+    "sufficiency": "required slots filled with provenance and no open conflict",
+    "render_template": "MFA is {enforcement} \u2014 {mechanism} required for {coverage}{; exceptions: {exceptions}}."
+  },
+  {
+    "id": "backup_dr",
+    "theme": "bcdr",
+    "question_ids": [
+      41,
+      42
+    ],
+    "claim": "Data is backed up on a defined schedule and recoverable per a documented DR plan",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "backups_exist",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you perform regular backups of client data?",
+        "aliases": [
+          "backup",
+          "backups",
+          "data backup",
+          "automated backup"
+        ]
+      },
+      {
+        "name": "frequency",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "continuous",
+          "hourly",
+          "daily",
+          "weekly",
+          "monthly",
+          "ad_hoc"
+        ],
+        "prompt": "How frequently are backups performed?"
+      },
+      {
+        "name": "automated",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are backups automated?"
+      },
+      {
+        "name": "retention_period",
+        "type": "duration",
+        "required": true,
+        "prompt": "How long are backups retained?"
+      },
+      {
+        "name": "offsite_or_cross_region",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are backups stored offsite or in a different cloud region from primary data?"
+      },
+      {
+        "name": "restore_tested",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are backup restores tested periodically?"
+      },
+      {
+        "name": "restore_test_date",
+        "type": "date",
+        "required": false,
+        "prompt": "When was the most recent restore test performed?"
+      },
+      {
+        "name": "rto",
+        "type": "duration",
+        "required": false,
+        "prompt": "What is your Recovery Time Objective (RTO)?"
+      },
+      {
+        "name": "rpo",
+        "type": "duration",
+        "required": false,
+        "prompt": "What is your Recovery Point Objective (RPO)?"
+      },
+      {
+        "name": "dr_plan_documented",
+        "type": "attachment",
+        "required": true,
+        "prompt": "Can you provide your documented DR/BCP plan?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "restore_tested == true and restore_test_date is empty",
+      "backups_exist == true and offsite_or_cross_region is empty"
+    ],
+    "sufficiency": "all required slots filled with provenance and no open conflict",
+    "render_template": "Backups run {frequency}, automated={automated}, retained for {retention_period}, offsite={offsite_or_cross_region}. Restores tested: {restore_tested}."
+  },
+  {
+    "id": "patch_remediation_sla",
+    "theme": "vulnerability_mgmt",
+    "question_ids": [
+      40
+    ],
+    "claim": "Documented remediation timelines exist for critical and high severity findings",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "documented",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have documented SLAs for patching/remediating vulnerabilities?",
+        "aliases": [
+          "remediation SLA",
+          "patch SLA",
+          "patching timeline",
+          "remediation timeline"
+        ]
+      },
+      {
+        "name": "critical_sla",
+        "type": "duration",
+        "required": true,
+        "prompt": "What is the SLA for remediating critical severity vulnerabilities?"
+      },
+      {
+        "name": "high_sla",
+        "type": "duration",
+        "required": true,
+        "prompt": "What is the SLA for remediating high severity vulnerabilities?"
+      },
+      {
+        "name": "tracking_system",
+        "type": "text",
+        "required": false,
+        "prompt": "What system do you use to track vulnerability remediation?"
+      }
+    ],
+    "vagueness_rules": [
+      "documented == true and (critical_sla empty or high_sla empty)"
+    ],
+    "sufficiency": "documented + both SLA durations filled",
+    "render_template": "Critical vulnerabilities remediated within {critical_sla}, high within {high_sla}. Tracked via {tracking_system}."
+  },
+  {
+    "id": "vuln_scanning",
+    "theme": "vulnerability_mgmt",
+    "question_ids": [
+      38,
+      39
+    ],
+    "claim": "Internal and external vulnerability scans are performed on a defined cadence",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "performed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are vulnerability scans performed on your systems?",
+        "aliases": [
+          "vulnerability scan",
+          "vuln scan",
+          "scanning",
+          "Nessus",
+          "Qualys",
+          "Tenable",
+          "OpenVAS"
+        ]
+      },
+      {
+        "name": "scope",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "internal",
+          "external",
+          "both"
+        ],
+        "prompt": "Do those scans cover internal systems, external-facing systems, or both?"
+      },
+      {
+        "name": "cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "continuous",
+          "weekly",
+          "monthly",
+          "quarterly",
+          "annually",
+          "ad_hoc"
+        ],
+        "prompt": "How often are they run?"
+      },
+      {
+        "name": "tooling",
+        "type": "text",
+        "required": false,
+        "prompt": "Which tool do you use for vulnerability scanning?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot is empty",
+      "cadence == 'ad_hoc' and no justification text present"
+    ],
+    "sufficiency": "all required slots filled, each with >=1 provenance entry, no open conflict",
+    "render_template": "Yes \u2014 {scope} vulnerability scans are performed {cadence}{, using {tooling}}."
+  },
+  {
+    "id": "security_policy",
+    "theme": "governance",
+    "question_ids": [
+      1,
+      5
+    ],
+    "claim": "A formal documented information security policy exists and is reviewed on a defined cadence",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a formal, documented information security policy?",
+        "aliases": [
+          "information security policy",
+          "IS policy",
+          "security policy",
+          "ISMS policy"
+        ]
+      },
+      {
+        "name": "review_cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "annually",
+          "biannually",
+          "quarterly",
+          "as_needed",
+          "never"
+        ],
+        "prompt": "How often is the security policy reviewed and updated?"
+      },
+      {
+        "name": "last_reviewed",
+        "type": "date",
+        "required": false,
+        "prompt": "When was the policy last reviewed?"
+      },
+      {
+        "name": "approved_by",
+        "type": "text",
+        "required": false,
+        "prompt": "Who approves the information security policy?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "exists=true and review_cadence filled",
+    "render_template": "Information security policy exists, reviewed {review_cadence}."
+  },
+  {
+    "id": "security_officer",
+    "theme": "governance",
+    "question_ids": [
+      2
+    ],
+    "claim": "A designated security officer or team is responsible for information security",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "designated_role",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is there a designated CISO, security officer, or equivalent role?",
+        "aliases": [
+          "CISO",
+          "security officer",
+          "information security officer",
+          "security manager",
+          "security team"
+        ]
+      },
+      {
+        "name": "role_title",
+        "type": "text",
+        "required": false,
+        "prompt": "What is the title of the security responsible role?"
+      },
+      {
+        "name": "dedicated_team",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is there a dedicated security team, or is it a single-person function?"
+      }
+    ],
+    "vagueness_rules": [
+      "designated_role is empty"
+    ],
+    "sufficiency": "designated_role filled with provenance",
+    "render_template": "Security responsibility held by {role_title}."
+  },
+  {
+    "id": "risk_governance",
+    "theme": "governance",
+    "question_ids": [
+      3,
+      4
+    ],
+    "claim": "Formal risk assessments are conducted and overseen by a governance body",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "risk_assessments_conducted",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you conduct periodic information security risk assessments?",
+        "aliases": [
+          "risk assessment",
+          "risk management",
+          "risk review",
+          "ISO 27001",
+          "NIST RMF"
+        ]
+      },
+      {
+        "name": "governance_body",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is there a governance committee or oversight body that reviews security strategy?"
+      },
+      {
+        "name": "methodology",
+        "type": "text",
+        "required": false,
+        "prompt": "What risk assessment methodology or framework do you follow?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "both required slots filled",
+    "render_template": "Risk assessments conducted={risk_assessments_conducted}; governance body present={governance_body}."
+  },
+  {
+    "id": "third_party_exists",
+    "theme": "third_party_risk",
+    "question_ids": [
+      6
+    ],
+    "claim": "The vendor uses contractors or sub-contractors in service delivery",
+    "importance": "medium",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "uses_contractors",
+        "type": "bool",
+        "required": true,
+        "prompt": "Will you be using contractors or sub-contractors in the delivery of services?",
+        "aliases": [
+          "contractor",
+          "sub-contractor",
+          "subcontractor",
+          "third party",
+          "outsource"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "uses_contractors is empty"
+    ],
+    "sufficiency": "uses_contractors filled",
+    "render_template": "Uses contractors: {uses_contractors}."
+  },
+  {
+    "id": "third_party_risk_program",
+    "theme": "third_party_risk",
+    "question_ids": [
+      7
+    ],
+    "claim": "A formal third-party risk management programme is in place for contractors and vendors",
+    "importance": "medium",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "third_party_exists",
+      "slot": "uses_contractors",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "program_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a formal third-party risk management (TPRM) programme?",
+        "aliases": [
+          "TPRM",
+          "third-party risk",
+          "vendor risk management",
+          "supplier risk"
+        ]
+      },
+      {
+        "name": "scope",
+        "type": "text",
+        "required": false,
+        "prompt": "What does the programme cover \u2014 which vendors, what assessments?"
+      }
+    ],
+    "vagueness_rules": [
+      "program_exists is empty"
+    ],
+    "sufficiency": "program_exists filled",
+    "render_template": "Third-party risk programme: {program_exists}."
+  },
+  {
+    "id": "vendor_assessment",
+    "theme": "third_party_risk",
+    "question_ids": [
+      8
+    ],
+    "claim": "Third-party vendors are assessed for security compliance before engagement",
+    "importance": "medium",
+    "answer_type": "attachment",
+    "depends_on": {
+      "rubric_id": "third_party_exists",
+      "slot": "uses_contractors",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "pre_engagement_assessment",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are vendors assessed for security compliance before they are engaged?",
+        "aliases": [
+          "vendor assessment",
+          "security questionnaire",
+          "due diligence",
+          "vendor audit"
+        ]
+      },
+      {
+        "name": "assessment_evidence",
+        "type": "attachment",
+        "required": false,
+        "prompt": "Can you provide a sample vendor assessment questionnaire or policy?"
+      }
+    ],
+    "vagueness_rules": [
+      "pre_engagement_assessment is empty"
+    ],
+    "sufficiency": "pre_engagement_assessment filled",
+    "render_template": "Pre-engagement vendor security assessment: {pre_engagement_assessment}."
+  },
+  {
+    "id": "third_party_contracts",
+    "theme": "third_party_risk",
+    "question_ids": [
+      9
+    ],
+    "claim": "Security requirements and obligations are included in third-party contracts",
+    "importance": "medium",
+    "answer_type": "bool",
+    "depends_on": {
+      "rubric_id": "third_party_exists",
+      "slot": "uses_contractors",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "security_clauses",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do contracts with third parties include security requirements and data protection obligations?",
+        "aliases": [
+          "security clause",
+          "data protection clause",
+          "contract security",
+          "NDA",
+          "DPA clause"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "security_clauses is empty"
+    ],
+    "sufficiency": "security_clauses filled",
+    "render_template": "Security clauses in third-party contracts: {security_clauses}."
+  },
+  {
+    "id": "vendor_monitoring",
+    "theme": "third_party_risk",
+    "question_ids": [
+      10
+    ],
+    "claim": "Third-party vendors are monitored and reviewed on an ongoing basis",
+    "importance": "medium",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "third_party_exists",
+      "slot": "uses_contractors",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "ongoing_monitoring",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you monitor and review third-party vendors during the contract period?",
+        "aliases": [
+          "vendor review",
+          "vendor monitoring",
+          "ongoing assessment",
+          "periodic review"
+        ]
+      },
+      {
+        "name": "review_cadence",
+        "type": "enum",
+        "required": false,
+        "enum": [
+          "annually",
+          "biannually",
+          "quarterly",
+          "continuously",
+          "as_needed"
+        ],
+        "prompt": "How often are vendor reviews conducted?"
+      }
+    ],
+    "vagueness_rules": [
+      "ongoing_monitoring is empty"
+    ],
+    "sufficiency": "ongoing_monitoring filled",
+    "render_template": "Ongoing vendor monitoring: {ongoing_monitoring}, cadence: {review_cadence}."
+  },
+  {
+    "id": "security_training",
+    "theme": "training",
+    "question_ids": [
+      11,
+      12,
+      13
+    ],
+    "claim": "All employees receive security awareness training on a defined cadence including phishing simulation",
+    "importance": "medium",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "training_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you provide security awareness training to all employees?",
+        "aliases": [
+          "security awareness",
+          "security training",
+          "employee training",
+          "phishing training"
+        ]
+      },
+      {
+        "name": "cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "annually",
+          "biannually",
+          "quarterly",
+          "monthly",
+          "at_onboarding_only",
+          "ad_hoc"
+        ],
+        "prompt": "How frequently is security awareness training conducted?"
+      },
+      {
+        "name": "phishing_simulation",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you conduct phishing simulations or other security awareness testing?"
+      },
+      {
+        "name": "completion_tracking",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is training completion tracked and reported?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "training_exists == true and cadence == 'at_onboarding_only'"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "Security training provided {cadence} to all employees; phishing sims: {phishing_simulation}."
+  },
+  {
+    "id": "privacy_policy",
+    "theme": "privacy",
+    "question_ids": [
+      14
+    ],
+    "claim": "A documented privacy policy is accessible to data subjects",
+    "importance": "medium",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a documented privacy policy accessible to data subjects?",
+        "aliases": [
+          "privacy policy",
+          "data privacy",
+          "privacy notice",
+          "privacy statement"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "exists is empty"
+    ],
+    "sufficiency": "exists filled",
+    "render_template": "Privacy policy exists: {exists}."
+  },
+  {
+    "id": "sensitive_data_access",
+    "theme": "privacy",
+    "question_ids": [
+      15
+    ],
+    "claim": "The vendor will have access to personally identifiable information or other sensitive client data",
+    "importance": "high",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "has_access",
+        "type": "bool",
+        "required": true,
+        "prompt": "Will you have access to PII or other sensitive data belonging to Client XYZ or its customers?",
+        "aliases": [
+          "PII",
+          "personal data",
+          "sensitive data",
+          "personal information",
+          "data access"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "has_access is empty"
+    ],
+    "sufficiency": "has_access filled",
+    "render_template": "Access to sensitive/PII data: {has_access}."
+  },
+  {
+    "id": "regulatory_compliance",
+    "theme": "privacy",
+    "question_ids": [
+      16
+    ],
+    "claim": "The vendor complies with applicable data protection regulations (GDPR, CCPA, POPIA or equivalent)",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "sensitive_data_access",
+      "slot": "has_access",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "compliant",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you comply with applicable data protection regulations such as GDPR, CCPA, or POPIA?",
+        "aliases": [
+          "GDPR",
+          "CCPA",
+          "POPIA",
+          "data protection",
+          "privacy regulation",
+          "compliance"
+        ]
+      },
+      {
+        "name": "applicable_regulations",
+        "type": "list",
+        "required": true,
+        "prompt": "Which regulations apply to your processing of client data?"
+      },
+      {
+        "name": "certification",
+        "type": "text",
+        "required": false,
+        "prompt": "Do you hold any privacy certifications (e.g. ISO 27701, Privacy Shield)?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "compliant == true and applicable_regulations is empty"
+    ],
+    "sufficiency": "compliant + applicable_regulations filled",
+    "render_template": "Regulatory compliance: {compliant} \u2014 regulations: {applicable_regulations}."
+  },
+  {
+    "id": "data_processing_agreement",
+    "theme": "privacy",
+    "question_ids": [
+      17
+    ],
+    "claim": "A Data Processing Agreement (DPA) or equivalent is in place for processing client personal data",
+    "importance": "high",
+    "answer_type": "attachment",
+    "depends_on": {
+      "rubric_id": "sensitive_data_access",
+      "slot": "has_access",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "dpa_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a Data Processing Agreement (DPA) or data processing addendum in place?",
+        "aliases": [
+          "DPA",
+          "data processing agreement",
+          "data processing addendum",
+          "GDPR contract"
+        ]
+      },
+      {
+        "name": "dpa_document",
+        "type": "attachment",
+        "required": false,
+        "prompt": "Can you provide a copy or template of your DPA?"
+      }
+    ],
+    "vagueness_rules": [
+      "dpa_exists is empty"
+    ],
+    "sufficiency": "dpa_exists filled",
+    "render_template": "DPA in place: {dpa_exists}."
+  },
+  {
+    "id": "dsar_process",
+    "theme": "privacy",
+    "question_ids": [
+      18
+    ],
+    "claim": "Documented procedures exist for handling data subject access requests and other privacy rights",
+    "importance": "medium",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "sensitive_data_access",
+      "slot": "has_access",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "dsar_process_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have documented procedures for handling data subject access requests (DSARs)?",
+        "aliases": [
+          "DSAR",
+          "data subject access request",
+          "right to access",
+          "right to erasure",
+          "privacy rights"
+        ]
+      },
+      {
+        "name": "response_sla",
+        "type": "duration",
+        "required": false,
+        "prompt": "What is your committed response time for DSAR requests?"
+      }
+    ],
+    "vagueness_rules": [
+      "dsar_process_exists is empty"
+    ],
+    "sufficiency": "dsar_process_exists filled",
+    "render_template": "DSAR process exists: {dsar_process_exists}."
+  },
+  {
+    "id": "data_residency",
+    "theme": "data_security",
+    "question_ids": [
+      19,
+      22
+    ],
+    "claim": "Client data is stored in known geographic locations with defined access controls",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "storage_locations",
+        "type": "list",
+        "required": true,
+        "prompt": "In which countries or regions is client data stored?",
+        "aliases": [
+          "data residency",
+          "data location",
+          "data storage",
+          "cloud region",
+          "data centre",
+          "AWS",
+          "Azure",
+          "GCP"
+        ]
+      },
+      {
+        "name": "cloud_providers",
+        "type": "list",
+        "required": true,
+        "prompt": "Which cloud providers or data centre operators host client data?"
+      },
+      {
+        "name": "access_limited_to",
+        "type": "text",
+        "required": true,
+        "prompt": "Who has access to client data? Describe need-to-know and access restrictions."
+      },
+      {
+        "name": "data_transfers",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is data transferred outside the primary storage region?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "storage_locations is empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "Data stored in {storage_locations} via {cloud_providers}; access limited to {access_limited_to}."
+  },
+  {
+    "id": "encryption_at_rest",
+    "theme": "data_security",
+    "question_ids": [
+      20
+    ],
+    "claim": "Data at rest is encrypted using a documented standard and managed key rotation",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "encrypted",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is data encrypted at rest?",
+        "aliases": [
+          "encryption at rest",
+          "AES",
+          "AES-256",
+          "disk encryption",
+          "database encryption",
+          "encrypted storage"
+        ]
+      },
+      {
+        "name": "standard",
+        "type": "text",
+        "required": true,
+        "prompt": "What encryption standard is used? (e.g. AES-256)"
+      },
+      {
+        "name": "key_management",
+        "type": "text",
+        "required": true,
+        "prompt": "How are encryption keys managed and rotated?"
+      },
+      {
+        "name": "coverage",
+        "type": "list",
+        "required": false,
+        "prompt": "What data stores are covered \u2014 databases, file storage, backups?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "encrypted == true and standard is empty"
+    ],
+    "sufficiency": "encrypted + standard + key_management filled",
+    "render_template": "Data at rest encrypted: {encrypted} using {standard}; key management: {key_management}."
+  },
+  {
+    "id": "encryption_in_transit",
+    "theme": "data_security",
+    "question_ids": [
+      21
+    ],
+    "claim": "Data in transit is encrypted using TLS 1.2 or higher across all channels",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "encrypted",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is data encrypted in transit?",
+        "aliases": [
+          "TLS",
+          "HTTPS",
+          "SSL",
+          "encryption in transit",
+          "transport encryption",
+          "TLS 1.2",
+          "TLS 1.3"
+        ]
+      },
+      {
+        "name": "protocol",
+        "type": "text",
+        "required": true,
+        "prompt": "Which protocol versions are used? (e.g. TLS 1.2+, TLS 1.3)"
+      },
+      {
+        "name": "coverage",
+        "type": "list",
+        "required": false,
+        "prompt": "Which communication channels are covered?"
+      },
+      {
+        "name": "certificates",
+        "type": "text",
+        "required": false,
+        "prompt": "How are TLS certificates managed?"
+      }
+    ],
+    "vagueness_rules": [
+      "encrypted is empty",
+      "encrypted == true and protocol is empty"
+    ],
+    "sufficiency": "encrypted + protocol filled",
+    "render_template": "Data in transit encrypted: {encrypted} via {protocol}."
+  },
+  {
+    "id": "data_retention",
+    "theme": "data_security",
+    "question_ids": [
+      23
+    ],
+    "claim": "A data retention policy defines how long client data is kept and how it is securely deleted",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "policy_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a data retention policy?",
+        "aliases": [
+          "data retention",
+          "retention policy",
+          "data lifecycle",
+          "data deletion",
+          "data disposal"
+        ]
+      },
+      {
+        "name": "retention_period",
+        "type": "duration",
+        "required": true,
+        "prompt": "How long is client data retained?"
+      },
+      {
+        "name": "deletion_method",
+        "type": "text",
+        "required": true,
+        "prompt": "How is client data securely deleted at end of retention or contract?"
+      },
+      {
+        "name": "deletion_on_request",
+        "type": "bool",
+        "required": false,
+        "prompt": "Can client data be deleted on request prior to the standard retention period?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "policy_exists == true and retention_period is empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "Data retained for {retention_period}; deletion method: {deletion_method}."
+  },
+  {
+    "id": "data_classification",
+    "theme": "data_security",
+    "question_ids": [
+      24
+    ],
+    "claim": "A data classification policy categorises data assets by sensitivity",
+    "importance": "medium",
+    "answer_type": "attachment",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "policy_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a documented data classification policy?",
+        "aliases": [
+          "data classification",
+          "data labelling",
+          "sensitivity classification",
+          "data tiers"
+        ]
+      },
+      {
+        "name": "policy_document",
+        "type": "attachment",
+        "required": false,
+        "prompt": "Can you provide your data classification policy?"
+      }
+    ],
+    "vagueness_rules": [
+      "policy_exists is empty"
+    ],
+    "sufficiency": "policy_exists filled",
+    "render_template": "Data classification policy exists: {policy_exists}."
+  },
+  {
+    "id": "physical_security_controls",
+    "theme": "physical_security",
+    "question_ids": [
+      25
+    ],
+    "claim": "Physical security controls are in place at primary facilities including access control and monitoring",
+    "importance": "medium",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "access_control",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is physical access to your facilities controlled (badge readers, locked doors)?",
+        "aliases": [
+          "physical access",
+          "badge access",
+          "physical security",
+          "facility security",
+          "CCTV"
+        ]
+      },
+      {
+        "name": "monitoring",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are facilities monitored with CCTV or security personnel?"
+      },
+      {
+        "name": "visitor_management",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is there a visitor management process?"
+      },
+      {
+        "name": "controls_description",
+        "type": "text",
+        "required": false,
+        "prompt": "Briefly describe the physical security controls in place."
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "access_control + monitoring filled",
+    "render_template": "Physical access control: {access_control}; monitoring: {monitoring}."
+  },
+  {
+    "id": "physical_access_required",
+    "theme": "physical_security",
+    "question_ids": [
+      26
+    ],
+    "claim": "The vendor requires physical access to Client XYZ premises",
+    "importance": "low",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "required",
+        "type": "bool",
+        "required": true,
+        "prompt": "Will you require physical access to Client XYZ premises or facilities?",
+        "aliases": [
+          "physical access",
+          "site access",
+          "on-site access",
+          "facility access"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "required is empty"
+    ],
+    "sufficiency": "required filled",
+    "render_template": "Physical access to client premises required: {required}."
+  },
+  {
+    "id": "physical_access_at_client",
+    "theme": "physical_security",
+    "question_ids": [
+      27,
+      28
+    ],
+    "claim": "Physical access to client facilities is controlled and scoped to defined personnel",
+    "importance": "low",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "physical_access_required",
+      "slot": "required",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "access_type",
+        "type": "text",
+        "required": true,
+        "prompt": "What type of physical access is required, and by which personnel?"
+      },
+      {
+        "name": "access_controls",
+        "type": "text",
+        "required": true,
+        "prompt": "What controls govern your staff's physical access to client facilities?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "both required slots filled",
+    "render_template": "Physical access type: {access_type}; controls: {access_controls}."
+  },
+  {
+    "id": "physical_security_policy",
+    "theme": "physical_security",
+    "question_ids": [
+      29
+    ],
+    "claim": "Physical security policies and procedures are documented",
+    "importance": "low",
+    "answer_type": "attachment",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "policy_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have documented physical security policies and procedures?"
+      },
+      {
+        "name": "policy_document",
+        "type": "attachment",
+        "required": false,
+        "prompt": "Can you provide your physical security policy?"
+      }
+    ],
+    "vagueness_rules": [
+      "policy_exists is empty"
+    ],
+    "sufficiency": "policy_exists filled",
+    "render_template": "Physical security policy exists: {policy_exists}."
+  },
+  {
+    "id": "web_app_exists",
+    "theme": "web_app_security",
+    "question_ids": [
+      30
+    ],
+    "claim": "Client XYZ will use a web application provided by the vendor",
+    "importance": "medium",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "provides_web_app",
+        "type": "bool",
+        "required": true,
+        "prompt": "Will Client XYZ be using a web application provided by you?",
+        "aliases": [
+          "web application",
+          "web app",
+          "SaaS",
+          "web portal",
+          "online platform"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "provides_web_app is empty"
+    ],
+    "sufficiency": "provides_web_app filled",
+    "render_template": "Web application provided to client: {provides_web_app}."
+  },
+  {
+    "id": "secure_development",
+    "theme": "web_app_security",
+    "question_ids": [
+      31
+    ],
+    "claim": "The web application is developed following secure coding practices such as OWASP guidelines",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "web_app_exists",
+      "slot": "provides_web_app",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "owasp_followed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you follow OWASP or equivalent secure development guidelines?",
+        "aliases": [
+          "OWASP",
+          "secure coding",
+          "secure development",
+          "SDL",
+          "SAMM"
+        ]
+      },
+      {
+        "name": "framework",
+        "type": "text",
+        "required": false,
+        "prompt": "Which secure development framework or standard do you follow?"
+      }
+    ],
+    "vagueness_rules": [
+      "owasp_followed is empty"
+    ],
+    "sufficiency": "owasp_followed filled",
+    "render_template": "Secure development practices followed: {owasp_followed} ({framework})."
+  },
+  {
+    "id": "waf_protection",
+    "theme": "web_app_security",
+    "question_ids": [
+      32
+    ],
+    "claim": "The web application is protected by a Web Application Firewall (WAF)",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "web_app_exists",
+      "slot": "provides_web_app",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "waf_deployed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is the web application protected by a WAF?",
+        "aliases": [
+          "WAF",
+          "web application firewall",
+          "Cloudflare",
+          "AWS WAF",
+          "Akamai"
+        ]
+      },
+      {
+        "name": "waf_product",
+        "type": "text",
+        "required": false,
+        "prompt": "Which WAF product or service do you use?"
+      }
+    ],
+    "vagueness_rules": [
+      "waf_deployed is empty"
+    ],
+    "sufficiency": "waf_deployed filled",
+    "render_template": "WAF deployed: {waf_deployed}{, product: {waf_product}}."
+  },
+  {
+    "id": "app_security_testing",
+    "theme": "web_app_security",
+    "question_ids": [
+      33
+    ],
+    "claim": "The web application undergoes DAST and/or SAST security testing",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "web_app_exists",
+      "slot": "provides_web_app",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "testing_performed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you conduct application security testing (DAST or SAST)?",
+        "aliases": [
+          "DAST",
+          "SAST",
+          "application security testing",
+          "dynamic analysis",
+          "static analysis",
+          "OWASP ZAP",
+          "Burp Suite"
+        ]
+      },
+      {
+        "name": "type",
+        "type": "list",
+        "required": true,
+        "prompt": "Which types of testing are performed \u2014 DAST, SAST, or both?"
+      },
+      {
+        "name": "cadence",
+        "type": "enum",
+        "required": false,
+        "enum": [
+          "per_release",
+          "continuously",
+          "quarterly",
+          "annually",
+          "ad_hoc"
+        ],
+        "prompt": "How often is application security testing performed?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "testing_performed + type filled",
+    "render_template": "App security testing: {type}, cadence: {cadence}."
+  },
+  {
+    "id": "app_pen_test",
+    "theme": "web_app_security",
+    "question_ids": [
+      34
+    ],
+    "claim": "The web application is covered under a penetration testing programme",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "web_app_exists",
+      "slot": "provides_web_app",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "included_in_pen_test",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is your web application covered under your penetration testing programme?",
+        "aliases": [
+          "pen test",
+          "penetration test",
+          "web app pen test",
+          "application pen test"
+        ]
+      },
+      {
+        "name": "last_pen_test",
+        "type": "date",
+        "required": false,
+        "prompt": "When was the web application last penetration tested?"
+      }
+    ],
+    "vagueness_rules": [
+      "included_in_pen_test is empty"
+    ],
+    "sufficiency": "included_in_pen_test filled",
+    "render_template": "Web app in pen test scope: {included_in_pen_test}."
+  },
+  {
+    "id": "sso_support",
+    "theme": "web_app_security",
+    "question_ids": [
+      35
+    ],
+    "claim": "The web application supports SSO or SAML 2.0 integration",
+    "importance": "low",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "web_app_exists",
+      "slot": "provides_web_app",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "sso_supported",
+        "type": "bool",
+        "required": true,
+        "prompt": "Does your web application support SSO or SAML 2.0 integration?",
+        "aliases": [
+          "SSO",
+          "SAML",
+          "single sign-on",
+          "OIDC",
+          "OAuth",
+          "identity federation"
+        ]
+      },
+      {
+        "name": "protocols",
+        "type": "list",
+        "required": false,
+        "prompt": "Which protocols are supported \u2014 SAML 2.0, OIDC, OAuth 2.0?"
+      }
+    ],
+    "vagueness_rules": [
+      "sso_supported is empty"
+    ],
+    "sufficiency": "sso_supported filled",
+    "render_template": "SSO/SAML supported: {sso_supported}."
+  },
+  {
+    "id": "secure_sdlc",
+    "theme": "secure_coding",
+    "question_ids": [
+      36,
+      37
+    ],
+    "claim": "A formal Secure SDLC process is followed including mandatory code reviews and SAST tooling",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "sdlc_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a formal Secure Software Development Lifecycle (SDLC) process?",
+        "aliases": [
+          "SDLC",
+          "secure SDLC",
+          "SDL",
+          "SSDLC",
+          "DevSecOps"
+        ]
+      },
+      {
+        "name": "code_reviews",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are code reviews mandatory before merging to production?",
+        "aliases": [
+          "code review",
+          "peer review",
+          "pull request review",
+          "merge review"
+        ]
+      },
+      {
+        "name": "sast_tooling",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you use automated static analysis (SAST) tools in your CI/CD pipeline?",
+        "aliases": [
+          "SAST",
+          "static analysis",
+          "Snyk",
+          "SonarQube",
+          "Checkmarx",
+          "Semgrep"
+        ]
+      },
+      {
+        "name": "sast_tool",
+        "type": "text",
+        "required": false,
+        "prompt": "Which SAST tool do you use?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "Secure SDLC: {sdlc_exists}; code reviews: {code_reviews}; SAST: {sast_tooling} ({sast_tool})."
+  },
+  {
+    "id": "ir_plan",
+    "theme": "incident_response",
+    "question_ids": [
+      43,
+      45
+    ],
+    "claim": "A documented incident response plan exists with a defined client notification timeline",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "irp_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a documented incident response plan (IRP)?",
+        "aliases": [
+          "incident response plan",
+          "IRP",
+          "incident response procedure",
+          "security incident response"
+        ]
+      },
+      {
+        "name": "notification_sla",
+        "type": "duration",
+        "required": true,
+        "prompt": "What is your committed timeline for notifying clients of a security incident affecting their data?"
+      },
+      {
+        "name": "notification_process",
+        "type": "text",
+        "required": true,
+        "prompt": "Describe your client notification process for a security incident."
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "irp_exists == true and notification_sla is empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "IRP exists: {irp_exists}; client notification within {notification_sla}."
+  },
+  {
+    "id": "ir_ownership",
+    "theme": "incident_response",
+    "question_ids": [
+      44
+    ],
+    "claim": "A named team or role owns incident response with defined responsibilities",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "ir_team_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is there a dedicated security incident response team (SIRT) or on-call responder?",
+        "aliases": [
+          "SIRT",
+          "incident response team",
+          "security team",
+          "on-call security"
+        ]
+      },
+      {
+        "name": "owner",
+        "type": "text",
+        "required": false,
+        "prompt": "Who is the primary owner of incident response \u2014 team name or role?"
+      }
+    ],
+    "vagueness_rules": [
+      "ir_team_exists is empty"
+    ],
+    "sufficiency": "ir_team_exists filled",
+    "render_template": "IR team exists: {ir_team_exists}{, owned by: {owner}}."
+  },
+  {
+    "id": "ir_plan_testing",
+    "theme": "incident_response",
+    "question_ids": [
+      46
+    ],
+    "claim": "The incident response plan is tested or exercised on a defined cadence",
+    "importance": "high",
+    "answer_type": "enum",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "test_cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "Annually",
+          "Semi-Annually",
+          "Quarterly",
+          "Ad-Hoc",
+          "Never"
+        ],
+        "prompt": "How often is your incident response plan tested or exercised?",
+        "aliases": [
+          "IR test",
+          "tabletop exercise",
+          "incident simulation",
+          "IR drill",
+          "IR exercise"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "test_cadence is empty"
+    ],
+    "sufficiency": "test_cadence filled with legal enum value",
+    "render_template": "IRP tested: {test_cadence}."
+  },
+  {
+    "id": "incident_log",
+    "theme": "incident_response",
+    "question_ids": [
+      47
+    ],
+    "claim": "An incident log or register is maintained to record and track security events",
+    "importance": "medium",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "log_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you maintain an incident log or register to record security events?",
+        "aliases": [
+          "incident log",
+          "incident register",
+          "security event log",
+          "incident tracker"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "log_exists is empty"
+    ],
+    "sufficiency": "log_exists filled",
+    "render_template": "Incident log maintained: {log_exists}."
+  },
+  {
+    "id": "security_incidents",
+    "theme": "incident_response",
+    "question_ids": [
+      48,
+      49
+    ],
+    "claim": "Any security incidents in the last 5 years have been disclosed with details of nature, impact, and resolution",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "incidents_occurred",
+        "type": "bool",
+        "required": true,
+        "prompt": "Have you experienced any security incidents or data breaches in the last 5 years?",
+        "aliases": [
+          "security incident",
+          "data breach",
+          "breach history",
+          "incident history",
+          "security event"
+        ]
+      },
+      {
+        "name": "incident_details",
+        "type": "text",
+        "required": false,
+        "prompt": "If yes, provide details: nature, impact, affected parties, and how it was resolved."
+      }
+    ],
+    "vagueness_rules": [
+      "incidents_occurred is empty",
+      "incidents_occurred == true and incident_details is empty"
+    ],
+    "sufficiency": "incidents_occurred filled; if true then incident_details also filled",
+    "render_template": "Security incidents in last 5 years: {incidents_occurred}{; details: {incident_details}}."
+  },
+  {
+    "id": "network_security_controls",
+    "theme": "network_endpoint",
+    "question_ids": [
+      50
+    ],
+    "claim": "Network security controls including firewalls, IDS/IPS, and segmentation are in place",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "firewall_deployed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have firewalls deployed at network boundaries?",
+        "aliases": [
+          "firewall",
+          "next-gen firewall",
+          "NGFW",
+          "network firewall",
+          "perimeter firewall"
+        ]
+      },
+      {
+        "name": "ids_ips",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you use intrusion detection or prevention systems (IDS/IPS)?",
+        "aliases": [
+          "IDS",
+          "IPS",
+          "intrusion detection",
+          "intrusion prevention",
+          "SIEM"
+        ]
+      },
+      {
+        "name": "network_segmentation",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is the network segmented to isolate sensitive systems?",
+        "aliases": [
+          "network segmentation",
+          "VLAN",
+          "DMZ",
+          "network isolation",
+          "micro-segmentation"
+        ]
+      },
+      {
+        "name": "ddos_protection",
+        "type": "bool",
+        "required": false,
+        "prompt": "Do you have DDoS protection in place?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "Firewall: {firewall_deployed}; IDS/IPS: {ids_ips}; segmentation: {network_segmentation}."
+  },
+  {
+    "id": "network_access_required",
+    "theme": "network_endpoint",
+    "question_ids": [
+      51
+    ],
+    "claim": "The vendor will access Client XYZ internal network or systems directly",
+    "importance": "medium",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "accesses_client_network",
+        "type": "bool",
+        "required": true,
+        "prompt": "Will you be accessing Client XYZ's internal network or systems directly?",
+        "aliases": [
+          "network access",
+          "VPN access",
+          "internal access",
+          "direct access"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "accesses_client_network is empty"
+    ],
+    "sufficiency": "accesses_client_network filled",
+    "render_template": "Accesses client network: {accesses_client_network}."
+  },
+  {
+    "id": "q52_malformed",
+    "theme": "network_endpoint",
+    "question_ids": [
+      52
+    ],
+    "claim": "Q52 is blank in the source questionnaire \u2014 not applicable",
+    "importance": "low",
+    "answer_type": "bool",
+    "depends_on": null,
+    "malformed": true,
+    "slots": [],
+    "vagueness_rules": [],
+    "sufficiency": "not applicable \u2014 question is malformed in source",
+    "render_template": "Q52: Malformed question (blank in source questionnaire) \u2014 not applicable."
+  },
+  {
+    "id": "client_network_segregation",
+    "theme": "network_endpoint",
+    "question_ids": [
+      53
+    ],
+    "claim": "Network segregation and access controls are applied when connecting to the client's internal network",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "network_access_required",
+      "slot": "accesses_client_network",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "segregation_applied",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you apply network segregation when accessing client networks?",
+        "aliases": [
+          "network segregation",
+          "VPN",
+          "dedicated connection",
+          "network isolation",
+          "jump host"
+        ]
+      },
+      {
+        "name": "access_method",
+        "type": "text",
+        "required": true,
+        "prompt": "How do you connect to the client network \u2014 VPN, dedicated link, jump host?"
+      },
+      {
+        "name": "mfa_for_remote",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is MFA required for remote access to the client network?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "segregation_applied + access_method filled",
+    "render_template": "Network segregation when accessing client: {segregation_applied}; via {access_method}."
+  },
+  {
+    "id": "endpoint_protection",
+    "theme": "network_endpoint",
+    "question_ids": [
+      54
+    ],
+    "claim": "Endpoint detection and response (EDR) or antivirus protection is deployed on all endpoints",
+    "importance": "high",
+    "answer_type": "attachment",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "edr_deployed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is EDR or antivirus/antimalware deployed on all endpoints?",
+        "aliases": [
+          "EDR",
+          "endpoint protection",
+          "antivirus",
+          "AV",
+          "CrowdStrike",
+          "SentinelOne",
+          "Defender",
+          "endpoint security"
+        ]
+      },
+      {
+        "name": "product",
+        "type": "text",
+        "required": false,
+        "prompt": "Which EDR or endpoint protection product do you use?"
+      },
+      {
+        "name": "coverage",
+        "type": "enum",
+        "required": false,
+        "enum": [
+          "all_endpoints",
+          "managed_endpoints_only",
+          "partial"
+        ],
+        "prompt": "Does it cover all endpoints or only managed devices?"
+      },
+      {
+        "name": "policy_document",
+        "type": "attachment",
+        "required": false,
+        "prompt": "Can you provide evidence of endpoint protection deployment?"
+      }
+    ],
+    "vagueness_rules": [
+      "edr_deployed is empty"
+    ],
+    "sufficiency": "edr_deployed filled",
+    "render_template": "EDR/AV deployed: {edr_deployed} ({product}), coverage: {coverage}."
+  },
+  {
+    "id": "asset_inventory",
+    "theme": "asset_management",
+    "question_ids": [
+      55,
+      56
+    ],
+    "claim": "A formal asset inventory is maintained and assets are classified by sensitivity or criticality",
+    "importance": "medium",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "inventory_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you maintain a formal inventory of hardware and software assets?",
+        "aliases": [
+          "asset inventory",
+          "CMDB",
+          "asset register",
+          "hardware inventory",
+          "software inventory"
+        ]
+      },
+      {
+        "name": "classification_applied",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are assets classified and labelled according to sensitivity or criticality?",
+        "aliases": [
+          "asset classification",
+          "asset labelling",
+          "critical assets",
+          "asset criticality"
+        ]
+      },
+      {
+        "name": "tooling",
+        "type": "text",
+        "required": false,
+        "prompt": "What tool or system is used to maintain the asset inventory?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "inventory_exists + classification_applied filled",
+    "render_template": "Asset inventory: {inventory_exists}; classification: {classification_applied}."
+  },
+  {
+    "id": "rbac",
+    "theme": "asset_management",
+    "question_ids": [
+      57
+    ],
+    "claim": "Role-Based Access Control (RBAC) is implemented across systems to enforce need-to-know",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "rbac_implemented",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is RBAC implemented across your systems and applications?",
+        "aliases": [
+          "RBAC",
+          "role-based access",
+          "role based access control",
+          "access roles",
+          "permission roles"
+        ]
+      },
+      {
+        "name": "coverage",
+        "type": "list",
+        "required": true,
+        "prompt": "Which systems have RBAC enforced?"
+      },
+      {
+        "name": "enforcement",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "enforced_technically",
+          "policy_only",
+          "partial"
+        ],
+        "prompt": "Is RBAC technically enforced or is it a policy requirement?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "RBAC implemented: {rbac_implemented}, {enforcement} across {coverage}."
+  },
+  {
+    "id": "privileged_access",
+    "theme": "asset_management",
+    "question_ids": [
+      58
+    ],
+    "claim": "Privileged accounts (admin, service) are managed with enhanced controls and monitoring",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "pam_exists",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is there a Privileged Access Management (PAM) process or tool in use?",
+        "aliases": [
+          "PAM",
+          "privileged access",
+          "admin accounts",
+          "service accounts",
+          "just-in-time",
+          "CyberArk",
+          "BeyondTrust"
+        ]
+      },
+      {
+        "name": "just_in_time",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is just-in-time (JIT) or on-demand privileged access used?"
+      },
+      {
+        "name": "monitoring",
+        "type": "bool",
+        "required": true,
+        "prompt": "Are privileged account sessions monitored or recorded?"
+      },
+      {
+        "name": "mfa_required",
+        "type": "bool",
+        "required": true,
+        "prompt": "Is MFA required for all privileged account access?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "all required slots filled",
+    "render_template": "PAM: {pam_exists}; monitoring: {monitoring}; MFA for priv accounts: {mfa_required}."
+  },
+  {
+    "id": "access_reviews",
+    "theme": "asset_management",
+    "question_ids": [
+      59
+    ],
+    "claim": "User access rights are reviewed and recertified on a defined cadence",
+    "importance": "high",
+    "answer_type": "enum",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "Continuously",
+          "Monthly",
+          "Quarterly",
+          "Semi-Annually",
+          "Annually"
+        ],
+        "prompt": "How frequently are user access rights reviewed and recertified?",
+        "aliases": [
+          "access review",
+          "access recertification",
+          "user access review",
+          "entitlement review",
+          "access audit"
+        ]
+      }
+    ],
+    "vagueness_rules": [
+      "cadence is empty"
+    ],
+    "sufficiency": "cadence filled with legal enum value",
+    "render_template": "Access rights reviewed: {cadence}."
+  },
+  {
+    "id": "offboarding",
+    "theme": "asset_management",
+    "question_ids": [
+      58,
+      62
+    ],
+    "claim": "Access is revoked promptly when employees or contractors leave the organisation",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "revocation_process",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you have a formal offboarding process that includes timely access revocation?",
+        "aliases": [
+          "offboarding",
+          "access revocation",
+          "account termination",
+          "leaver process",
+          "deprovisioning"
+        ]
+      },
+      {
+        "name": "revocation_sla",
+        "type": "duration",
+        "required": true,
+        "prompt": "Within what timeframe is access revoked when an employee or contractor leaves?"
+      },
+      {
+        "name": "automated",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is access revocation automated through your identity system?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "revocation_process == true and revocation_sla is empty"
+    ],
+    "sufficiency": "revocation_process + revocation_sla filled",
+    "render_template": "Access revoked within {revocation_sla} of departure; automated: {automated}."
+  },
+  {
+    "id": "least_privilege",
+    "theme": "asset_management",
+    "question_ids": [
+      62
+    ],
+    "claim": "The principle of least privilege is enforced for all user accounts including service accounts",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "enforced",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you enforce the principle of least privilege for all user accounts?",
+        "aliases": [
+          "least privilege",
+          "need-to-know",
+          "minimum access",
+          "principle of least privilege",
+          "POLP"
+        ]
+      },
+      {
+        "name": "service_accounts_included",
+        "type": "bool",
+        "required": true,
+        "prompt": "Does least privilege apply to service accounts and automated processes?"
+      },
+      {
+        "name": "enforcement_mechanism",
+        "type": "text",
+        "required": false,
+        "prompt": "How is least privilege technically enforced?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "enforced + service_accounts_included filled",
+    "render_template": "Least privilege enforced: {enforced}; includes service accounts: {service_accounts_included}."
+  },
+  {
+    "id": "risk_assessment_process",
+    "theme": "risk_assessment",
+    "question_ids": [
+      63,
+      64
+    ],
+    "claim": "Formal information security risk assessments are conducted on a defined cadence by a named owner",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "conducted",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you conduct formal information security risk assessments?",
+        "aliases": [
+          "risk assessment",
+          "risk analysis",
+          "risk evaluation",
+          "ISO 27001 risk",
+          "NIST risk"
+        ]
+      },
+      {
+        "name": "cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "annually",
+          "biannually",
+          "quarterly",
+          "continuously",
+          "ad_hoc"
+        ],
+        "prompt": "How frequently are risk assessments performed?"
+      },
+      {
+        "name": "owner",
+        "type": "text",
+        "required": false,
+        "prompt": "Who is responsible for conducting risk assessments?"
+      },
+      {
+        "name": "methodology",
+        "type": "text",
+        "required": false,
+        "prompt": "What methodology or framework guides your risk assessments?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty"
+    ],
+    "sufficiency": "conducted + cadence filled",
+    "render_template": "Risk assessments conducted {cadence} by {owner}."
+  },
+  {
+    "id": "pen_testing",
+    "theme": "risk_assessment",
+    "question_ids": [
+      65
+    ],
+    "claim": "Penetration testing is conducted on systems and applications on a defined cadence",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": null,
+    "malformed": false,
+    "slots": [
+      {
+        "name": "performed",
+        "type": "bool",
+        "required": true,
+        "prompt": "Do you conduct penetration testing on your systems and applications?",
+        "aliases": [
+          "pen test",
+          "penetration test",
+          "pentest",
+          "ethical hacking",
+          "red team",
+          "CREST"
+        ]
+      },
+      {
+        "name": "cadence",
+        "type": "enum",
+        "required": true,
+        "enum": [
+          "annually",
+          "biannually",
+          "quarterly",
+          "per_major_release",
+          "ad_hoc"
+        ],
+        "prompt": "How frequently is penetration testing conducted?"
+      },
+      {
+        "name": "scope",
+        "type": "list",
+        "required": true,
+        "prompt": "What is in scope for penetration testing \u2014 internal infrastructure, external, web apps, APIs?"
+      },
+      {
+        "name": "third_party_provider",
+        "type": "bool",
+        "required": false,
+        "prompt": "Is penetration testing performed by an independent third party?"
+      },
+      {
+        "name": "last_test_date",
+        "type": "date",
+        "required": false,
+        "prompt": "When was the most recent penetration test conducted?"
+      }
+    ],
+    "vagueness_rules": [
+      "any required slot empty",
+      "performed == true and cadence is empty"
+    ],
+    "sufficiency": "performed + cadence + scope filled",
+    "render_template": "Pen testing performed {cadence}, scope: {scope}."
+  },
+  {
+    "id": "pen_test_remediation",
+    "theme": "risk_assessment",
+    "question_ids": [
+      66
+    ],
+    "claim": "Penetration test findings are tracked and remediated within defined timelines",
+    "importance": "high",
+    "answer_type": "composite",
+    "depends_on": {
+      "rubric_id": "pen_testing",
+      "slot": "performed",
+      "equals": true
+    },
+    "malformed": false,
+    "slots": [
+      {
+        "name": "findings_remediated",
+        "type": "bool",
+        "required": true,
+        "prompt": "Have findings from penetration testing been remediated?",
+        "aliases": [
+          "pen test findings",
+          "remediation",
+          "finding resolution",
+          "pen test remediation"
+        ]
+      },
+      {
+        "name": "tracking_process",
+        "type": "text",
+        "required": true,
+        "prompt": "How are penetration test findings tracked to remediation?"
+      },
+      {
+        "name": "critical_sla",
+        "type": "duration",
+        "required": false,
+        "prompt": "What is the SLA for remediating critical pen test findings?"
+      }
+    ],
+    "vagueness_rules": [
+      "findings_remediated is empty",
+      "findings_remediated == true and tracking_process is empty"
+    ],
+    "sufficiency": "findings_remediated + tracking_process filled",
+    "render_template": "Pen test findings remediated: {findings_remediated}; tracked via {tracking_process}."
+  }
+]

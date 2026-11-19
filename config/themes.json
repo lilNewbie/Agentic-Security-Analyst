@@ -1,0 +1,86 @@
+[
+  {
+    "key": "governance",
+    "display_name": "Governance",
+    "question_range": [1, 5],
+    "multiplier": 1.0
+  },
+  {
+    "key": "third_party_risk",
+    "display_name": "Third-Party Risk Management",
+    "question_range": [6, 10],
+    "multiplier": 1.0
+  },
+  {
+    "key": "training",
+    "display_name": "Security Awareness & Training",
+    "question_range": [11, 13],
+    "multiplier": 0.9
+  },
+  {
+    "key": "privacy",
+    "display_name": "Privacy",
+    "question_range": [14, 18],
+    "multiplier": 1.1
+  },
+  {
+    "key": "data_security",
+    "display_name": "Data Security",
+    "question_range": [19, 24],
+    "multiplier": 1.5
+  },
+  {
+    "key": "physical_security",
+    "display_name": "Physical Security",
+    "question_range": [25, 29],
+    "multiplier": 0.8
+  },
+  {
+    "key": "web_app_security",
+    "display_name": "Web Application Security",
+    "question_range": [30, 35],
+    "multiplier": 1.2
+  },
+  {
+    "key": "secure_coding",
+    "display_name": "Secure Coding",
+    "question_range": [36, 37],
+    "multiplier": 1.0
+  },
+  {
+    "key": "vulnerability_mgmt",
+    "display_name": "Vulnerability Management",
+    "question_range": [38, 40],
+    "multiplier": 1.5
+  },
+  {
+    "key": "bcdr",
+    "display_name": "Business Continuity & Disaster Recovery",
+    "question_range": [41, 42],
+    "multiplier": 1.2
+  },
+  {
+    "key": "incident_response",
+    "display_name": "Incident Response",
+    "question_range": [43, 49],
+    "multiplier": 1.5
+  },
+  {
+    "key": "network_endpoint",
+    "display_name": "Network & Endpoint Security",
+    "question_range": [50, 54],
+    "multiplier": 1.3
+  },
+  {
+    "key": "asset_management",
+    "display_name": "Asset Management",
+    "question_range": [55, 62],
+    "multiplier": 1.5
+  },
+  {
+    "key": "risk_assessment",
+    "display_name": "Risk Assessment",
+    "question_range": [63, 66],
+    "multiplier": 1.2
+  }
+]

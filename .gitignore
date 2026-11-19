@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+AI_SECURITY_ANALYST_SPEC.md
+# Virtual environments
+secvenv/
+venv/
+env/
+.venv/
+pipeline/secvenv/
+docs/
+# Environment variables
+.env
+.env.local
+secrets.txt
+
+# Node / Next.js
+node_modules/
+.next/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+
+# Supabase temp
+supabase/.temp/
+
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
