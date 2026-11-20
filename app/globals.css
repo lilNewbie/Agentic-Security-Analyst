@@ -35,3 +35,15 @@ textarea,
 select {
   color: #111827;
 }
+
+@media print {
+  aside {
+    display: none !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}

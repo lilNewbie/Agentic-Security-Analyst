@@ -110,6 +110,16 @@ def register_document(company_id: str, filename: str, source_type: str,
     return doc_id
 
 
+def get_documents(company_id: str) -> list[dict]:
+    res = (get_client()
+           .table("documents")
+           .select("*")
+           .eq("company_id", company_id)
+           .order("uploaded_at", desc=True)
+           .execute())
+    return res.data or []
+
+
 # ---------------------------------------------------------------------------
 # Chunk storage
 # ---------------------------------------------------------------------------

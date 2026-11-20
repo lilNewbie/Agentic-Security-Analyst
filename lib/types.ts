@@ -137,6 +137,35 @@ export interface Company {
   created_at: string;
 }
 
+export interface ReportThemeScore {
+  theme: string;
+  display_name: string;
+  score: number;
+  answered: number;
+  applicable: number;
+  top_gaps: Array<{ rubric_id: string; claim: string }>;
+}
+
+export interface ReportRisk {
+  rubric_id: string;
+  claim: string;
+  theme: string;
+  importance: Importance;
+  state: NodeState;
+}
+
+export interface AnalystReport {
+  company: Company;
+  generated_at: string;
+  posture_score: number;
+  answered: number;
+  applicable: number;
+  total: number;
+  open_conflicts_count: number;
+  theme_scores: ReportThemeScore[];
+  top_risks: ReportRisk[];
+}
+
 export type QuestionStatus =
   | "verified_from_documents"
   | "confirmed_by_user"
@@ -164,6 +193,26 @@ export interface QuestionnaireResponse {
   questions: QuestionnaireQuestion[];
 }
 
+export interface Document {
+  id: string;
+  company_id: string;
+  filename: string;
+  source_type: string;
+  doc_class: string;
+  authored_at: string | null;
+  uploaded_at: string;
+  page_count: number;
+  raw_path: string | null;
+}
+
+export interface NodeDelta {
+  rubric_id: string;
+  old_state: NodeState | null;
+  new_state: NodeState;
+  slots_filled: string[];
+  confidence: number;
+}
+
 export interface IngestionJobStatus {
   job_id: string;
   status: "pending" | "running" | "done" | "failed";
@@ -173,12 +222,14 @@ export interface IngestionJobStatus {
     files_processed?: number;
     candidates_extracted?: number;
     facts_bound?: number;
+    graph_delta?: NodeDelta[];
     file_results?: Array<{
       file: string;
       status: string;
       candidates?: number;
       bound?: number;
       errors?: string[];
+      graph_delta?: NodeDelta[];
     }>;
   } | null;
 }

@@ -1,5 +1,7 @@
 import type {
+  AnalystReport,
   Company,
+  Document,
   GraphResponse,
   IngestionJobStatus,
   NodeDetail,
@@ -63,6 +65,15 @@ export const api = {
 
   getQuestionnaire: (companyId: string) =>
     request<QuestionnaireResponse>(`/api/company/${companyId}/questionnaire`),
+
+  getReport: (companyId: string) =>
+    request<AnalystReport>(`/api/company/${companyId}/report`),
+
+  listDocuments: (companyId: string) =>
+    request<Document[]>(`/api/company/${companyId}/documents`),
+
+  refreshGraph: (companyId: string) =>
+    request<{ changes: unknown[]; total_recomputed: number }>(`/api/company/${companyId}/refresh`, { method: "POST" }),
 
   uploadDocument: async (companyId: string, file: File, sourceType?: string): Promise<{ ingestion_job_id: string }> => {
     const form = new FormData();

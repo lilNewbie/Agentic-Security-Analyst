@@ -49,6 +49,8 @@ export default function CompanyLayout({ children }: { children: React.ReactNode 
           <NavLink href={`/${companyId}/graph`} label="Graph" />
           <NavLink href={`/${companyId}/queue`} label="Work Queue" />
           <NavLink href={`/${companyId}/questionnaire`} label="Questionnaire" />
+          <NavLink href={`/${companyId}/report`} label="Report" />
+          <NavLink href={`/${companyId}/documents`} label="Documents" />
           <NavLink href={`/${companyId}/upload`} label="Upload" />
         </nav>
 

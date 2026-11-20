@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import type { IngestionJobStatus } from "@/lib/types";
+import { StateChip } from "@/components/StateChip";
+import type { IngestionJobStatus, NodeDelta, NodeState } from "@/lib/types";
 
 const SOURCE_TYPES = [
   { value: "", label: "Auto-detect from filename" },
@@ -79,11 +81,14 @@ function JobPanel({
           )}
 
           {job.status === "done" && job.result && (
-            <div className="mt-3 grid grid-cols-3 gap-3">
-              <Stat label="Files" value={String(job.result.files_processed ?? 1)} />
-              <Stat label="Candidates" value={String(job.result.candidates_extracted ?? "—")} />
-              <Stat label="Bound" value={String(job.result.facts_bound ?? "—")} />
-            </div>
+            <>
+              <div className="mt-3 grid grid-cols-3 gap-3">
+                <Stat label="Files" value={String(job.result.files_processed ?? 1)} />
+                <Stat label="Candidates" value={String(job.result.candidates_extracted ?? "—")} />
+                <Stat label="Bound" value={String(job.result.facts_bound ?? "—")} />
+              </div>
+              <StateDiff delta={job.result.graph_delta ?? []} companyId={companyId} />
+            </>
           )}
 
           {job.errors.length > 0 && (
@@ -96,6 +101,67 @@ function JobPanel({
         </>
       )}
     </div>
+  );
+}
+
+const STATE_CHANGE_LABEL: Record<string, string> = {
+  verified: "Verified",
+  user_confirmed: "Confirmed",
+  conflicted: "Conflicted",
+  vague: "Vague",
+  unknown: "Unknown",
+  not_applicable: "N/A",
+  pending_gate: "Pending gate",
+  attempted_unknown: "Attempted",
+};
+
+function StateDiff({ delta, companyId }: { delta: NodeDelta[]; companyId: string }) {
+  const changed = delta.filter((d) => d.old_state !== d.new_state);
+  if (changed.length === 0) return null;
+
+  const improved = changed.filter((d) =>
+    (d.new_state === "verified" || d.new_state === "user_confirmed") &&
+    d.old_state !== "verified" && d.old_state !== "user_confirmed"
+  );
+  const newConflicts = changed.filter((d) => d.new_state === "conflicted" && d.old_state !== "conflicted");
+  const other = changed.filter((d) => !improved.includes(d) && !newConflicts.includes(d));
+
+  return (
+    <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+      <p className="text-xs font-semibold text-gray-600 mb-2">
+        {changed.length} rubric{changed.length !== 1 ? "s" : ""} changed state
+      </p>
+      <div className="space-y-1">
+        {improved.map((d) => (
+          <DeltaRow key={d.rubric_id} d={d} companyId={companyId} />
+        ))}
+        {newConflicts.map((d) => (
+          <DeltaRow key={d.rubric_id} d={d} companyId={companyId} />
+        ))}
+        {other.slice(0, 5).map((d) => (
+          <DeltaRow key={d.rubric_id} d={d} companyId={companyId} />
+        ))}
+        {other.length > 5 && (
+          <p className="text-xs text-gray-400 pt-1">+{other.length - 5} more</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DeltaRow({ d, companyId }: { d: NodeDelta; companyId: string }) {
+  return (
+    <Link
+      href={`/${companyId}/node/${d.rubric_id}`}
+      className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-900 transition-colors"
+    >
+      <span className="text-gray-300 shrink-0">
+        {d.old_state ? STATE_CHANGE_LABEL[d.old_state] ?? d.old_state : "new"}
+      </span>
+      <span className="text-gray-300">→</span>
+      <StateChip state={d.new_state as NodeState} />
+      <span className="text-gray-400 truncate">{d.rubric_id}</span>
+    </Link>
   );
 }
 

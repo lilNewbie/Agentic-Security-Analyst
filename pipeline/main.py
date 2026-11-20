@@ -198,6 +198,23 @@ def get_ingestion_status(company_id: str, job_id: str):
     }
 
 
+@app.get("/api/company/{company_id}/documents")
+def list_documents(company_id: str):
+    _assert_company(company_id)
+    return db.get_documents(company_id)
+
+
+@app.post("/api/company/{company_id}/refresh")
+def refresh_graph(company_id: str):
+    """Re-run review pass on all existing entries without new extraction."""
+    _assert_company(company_id)
+    from binder import run_review_pass
+    rubric_map = _load_rubric_map()
+    delta = run_review_pass(company_id, rubric_map)
+    changes = [d.model_dump() for d in delta.deltas if d.old_state != d.new_state]
+    return {"changes": changes, "total_recomputed": len(delta.deltas)}
+
+
 # ---------------------------------------------------------------------------
 # Graph + nodes
 # ---------------------------------------------------------------------------
@@ -265,6 +282,91 @@ def get_queue(company_id: str):
 def get_stats(company_id: str):
     _assert_company(company_id)
     return db.get_stats(company_id)
+
+
+# ---------------------------------------------------------------------------
+# Analyst report
+# ---------------------------------------------------------------------------
+
+@app.get("/api/company/{company_id}/report")
+def get_report(company_id: str):
+    _assert_company(company_id)
+    company = db.get_company(company_id)
+    rubrics = db.load_rubrics()
+    themes = db.load_themes()
+    node_states = {ns["rubric_id"]: ns for ns in db.get_all_node_states(company_id)}
+    open_conflicts = db.get_open_conflicts(company_id)
+
+    rubric_map = {r["id"]: r for r in rubrics}
+
+    ANSWERED = {"verified", "user_confirmed"}
+    INAPPLICABLE = {"not_applicable", "pending_gate"}
+    RISK_STATES = {"unknown", "conflicted", "vague", "attempted_unknown"}
+    RISK_ORDER = {"conflicted": 0, "vague": 1, "unknown": 2, "attempted_unknown": 3}
+    IMP_ORDER = {"high": 0, "medium": 1, "low": 2}
+
+    total = len(node_states)
+    applicable = sum(1 for ns in node_states.values() if ns["state"] not in INAPPLICABLE)
+    answered = sum(1 for ns in node_states.values() if ns["state"] in ANSWERED)
+    posture_score = round(answered / applicable, 4) if applicable > 0 else 0.0
+
+    theme_scores = []
+    for theme in themes:
+        tkey = theme["key"]
+        theme_rubrics = [r for r in rubrics if r["theme"] == tkey]
+        theme_applicable = [
+            r for r in theme_rubrics
+            if node_states.get(r["id"], {}).get("state", "unknown") not in INAPPLICABLE
+        ]
+        theme_answered = [
+            r for r in theme_applicable
+            if node_states.get(r["id"], {}).get("state", "unknown") in ANSWERED
+        ]
+        theme_gaps = [
+            r for r in theme_applicable
+            if node_states.get(r["id"], {}).get("state", "unknown") in RISK_STATES
+            and r.get("importance") == "high"
+        ]
+        t_applicable = len(theme_applicable)
+        t_answered = len(theme_answered)
+        theme_scores.append({
+            "theme": tkey,
+            "display_name": theme["display_name"],
+            "score": round(t_answered / t_applicable, 4) if t_applicable > 0 else 0.0,
+            "answered": t_answered,
+            "applicable": t_applicable,
+            "top_gaps": [{"rubric_id": r["id"], "claim": r["claim"]} for r in theme_gaps[:3]],
+        })
+
+    top_risks = []
+    for rubric_id, ns in node_states.items():
+        if ns["state"] not in RISK_STATES:
+            continue
+        rubric = rubric_map.get(rubric_id)
+        if not rubric or rubric.get("importance") == "low":
+            continue
+        top_risks.append({
+            "rubric_id": rubric_id,
+            "claim": rubric["claim"],
+            "theme": rubric["theme"],
+            "importance": rubric["importance"],
+            "state": ns["state"],
+        })
+    top_risks.sort(key=lambda r: (IMP_ORDER.get(r["importance"], 2), RISK_ORDER.get(r["state"], 3)))
+    top_risks = top_risks[:15]
+
+    from datetime import datetime, timezone
+    return {
+        "company": company,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "posture_score": posture_score,
+        "answered": answered,
+        "applicable": applicable,
+        "total": total,
+        "open_conflicts_count": len(open_conflicts),
+        "theme_scores": theme_scores,
+        "top_risks": top_risks,
+    }
 
 
 # ---------------------------------------------------------------------------

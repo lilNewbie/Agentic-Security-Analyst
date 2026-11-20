@@ -68,6 +68,7 @@ export default function GraphPage() {
   const [data, setData] = useState<GraphResponse | null>(null);
   const [filter, setFilter] = useState<NodeState | "all">("all");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api.getGraph(companyId)
@@ -77,6 +78,7 @@ export default function GraphPage() {
   }, [companyId]);
 
   if (loading) return <PageShell><p className="text-gray-400 text-sm">Loading…</p></PageShell>;
+  if (error) return <PageShell><p className="text-red-500 text-sm">{error}</p></PageShell>;
   if (!data) return <PageShell><p className="text-red-500 text-sm">Failed to load graph.</p></PageShell>;
 
   const themeMap = new Map(data.themes.map((t) => [t.key, t]));
