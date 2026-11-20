@@ -48,6 +48,8 @@ export default function CompanyLayout({ children }: { children: React.ReactNode 
         <nav className="flex-1 p-3 space-y-1">
           <NavLink href={`/${companyId}/graph`} label="Graph" />
           <NavLink href={`/${companyId}/queue`} label="Work Queue" />
+          <NavLink href={`/${companyId}/questionnaire`} label="Questionnaire" />
+          <NavLink href={`/${companyId}/upload`} label="Upload" />
         </nav>
 
         {stats && (

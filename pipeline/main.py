@@ -288,7 +288,7 @@ def get_questionnaire(company_id: str):
     for qid in range(1, 67):
         rubric_ids = q_to_rubrics.get(qid, [])
         if not rubric_ids:
-            questions.append({"question_id": qid, "status": "unknown", "response": None})
+            questions.append({"question_id": qid, "label": "", "status": "unknown", "response": None, "confidence": 0.0, "evidence": []})
             continue
 
         # Merge across rubrics that answer this question
@@ -317,15 +317,22 @@ def get_questionnaire(company_id: str):
             {
                 "doc": e.get("source_id"),
                 "date": (e.get("source_authored_at") or "")[:10],
-                "page": json.loads(e.get("source_locator") or "{}").get("page"),
+                "page": (e.get("source_locator") or {}).get("page"),
                 "span": e.get("source_span"),
             }
             for e in entries_for_q
             if e.get("source_kind") == "document" and e.get("source_span")
         ]
 
+        label = "; ".join(
+            rubric_map[rid]["claim"]
+            for rid in rubric_ids
+            if rid in rubric_map and rubric_map[rid].get("claim")
+        )
+
         questions.append({
             "question_id": qid,
+            "label": label,
             "status": _map_state_to_render_status(overall_state),
             "response": response,
             "confidence": min(confidence_vals) if confidence_vals else 0.0,

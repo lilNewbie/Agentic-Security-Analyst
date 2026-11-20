@@ -1,8 +1,10 @@
 import type {
   Company,
   GraphResponse,
+  IngestionJobStatus,
   NodeDetail,
   QueueItem,
+  QuestionnaireResponse,
   Stats,
 } from "./types";
 
@@ -58,4 +60,25 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ winning_entry_id: winningEntryId, note: note ?? "" }),
     }),
+
+  getQuestionnaire: (companyId: string) =>
+    request<QuestionnaireResponse>(`/api/company/${companyId}/questionnaire`),
+
+  uploadDocument: async (companyId: string, file: File, sourceType?: string): Promise<{ ingestion_job_id: string }> => {
+    const form = new FormData();
+    form.append("file", file);
+    if (sourceType) form.append("source_type", sourceType);
+    const res = await fetch(`${BASE}/api/company/${companyId}/documents`, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => res.statusText);
+      throw new Error(`${res.status} ${text}`);
+    }
+    return res.json();
+  },
+
+  getIngestionStatus: (companyId: string, jobId: string) =>
+    request<IngestionJobStatus>(`/api/company/${companyId}/ingestion/${jobId}`),
 };

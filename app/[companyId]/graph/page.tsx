@@ -72,6 +72,7 @@ export default function GraphPage() {
   useEffect(() => {
     api.getGraph(companyId)
       .then(setData)
+      .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, [companyId]);
 

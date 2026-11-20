@@ -136,3 +136,49 @@ export interface Company {
   metadata: Record<string, unknown>;
   created_at: string;
 }
+
+export type QuestionStatus =
+  | "verified_from_documents"
+  | "confirmed_by_user"
+  | "not_applicable"
+  | "partial"
+  | "unknown";
+
+export interface QuestionEvidence {
+  doc: string | null;
+  date: string;
+  page: number | null;
+  span: string | null;
+}
+
+export interface QuestionnaireQuestion {
+  question_id: number;
+  label: string;
+  status: QuestionStatus;
+  response: string | null;
+  confidence: number;
+  evidence: QuestionEvidence[];
+}
+
+export interface QuestionnaireResponse {
+  questions: QuestionnaireQuestion[];
+}
+
+export interface IngestionJobStatus {
+  job_id: string;
+  status: "pending" | "running" | "done" | "failed";
+  progress: number;
+  errors: string[];
+  result: {
+    files_processed?: number;
+    candidates_extracted?: number;
+    facts_bound?: number;
+    file_results?: Array<{
+      file: string;
+      status: string;
+      candidates?: number;
+      bound?: number;
+      errors?: string[];
+    }>;
+  } | null;
+}

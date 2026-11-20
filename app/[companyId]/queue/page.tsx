@@ -33,6 +33,7 @@ export default function QueuePage() {
   useEffect(() => {
     api.getQueue(companyId)
       .then(setItems)
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [companyId]);
 
